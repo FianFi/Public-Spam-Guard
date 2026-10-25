@@ -1,0 +1,9 @@
+{
+  "watch": ["commands", "events", "mouri.js"],
+  "ext": "js",
+  "ignore": [
+    ".json",
+    ".json"
+  ],
+  "delay": 500
+}
