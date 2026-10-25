@@ -5,9 +5,22 @@ const SqlDB = require('../services/connection.js');
 module.exports = {
     name: discord.Events.InteractionCreate,
     async execute(interaction){ 
-        console.log(interaction.customId);
-        if(interaction.user.id !== interaction.guild.ownerId) return;
         if(!interaction.isStringSelectMenu() && !interaction.isButton() && !interaction.isRoleSelectMenu() && !interaction.isChannelSelectMenu()) return;
+        let guildData;
+        try {
+            [guildData] = await SqlDB.query(
+                `SELECT * FROM guild_info WHERE guild_id = ?`,
+                [interaction.guild.id]
+            );
+        } catch (error) {
+            await interaction.reply({
+                content: "An error occurred! Please try again later!",
+                flags: discord.MessageFlags.Ephemeral
+            });
+            console.error(error);
+            return;
+        }
+        if(interaction.user.id !== interaction.guild.ownerId) return;
         console.log(interaction.customId); 
         if(interaction.customId === "pick_setup_menu"){
             console.log(interaction.values[0]); 

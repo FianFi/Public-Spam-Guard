@@ -34,9 +34,10 @@ module.exports = {
             });
             return;
         }
-        if(interaction.user.id !== guildData[0].owner_id){
+        const isMod = await modChecker(interaction);
+        if(interaction.user.id !== guildData[0].owner_id && !isMod){
             await interaction.reply({
-                content: "Only the server owner can set the invitation link for this bot.",
+                content: "Only the server owner and admins can use this command.",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
@@ -67,5 +68,38 @@ module.exports = {
             content: `The invitation link has been set: ${inviteLink}`,
             flags: discord.MessageFlags.Ephemeral
         }); 
+    }
+}
+async function modChecker(interaction) {
+    try {
+        console.log("Menjalankan prosedur pengecekan status mod checker");
+        const [modRole] = await SqlDB.query(
+            "SELECT `admin_role` FROM guild_info WHERE `guild_id` = ?",
+            [interaction.guild.id]
+        ) 
+        const clicker = await interaction.guild.members.fetch(interaction.user.id);
+        const roles = clicker.roles.cache
+            .filter(role => role.id !== interaction.guild.id) // exclude @everyone
+            .map(role => ({
+                role: role.id,
+                name: role.name
+            }));
+        const tMods = modRole[0].admin_role;
+        let isMods = false;
+        for(const role of roles){
+            if(tMods.includes(role.role)){
+                console.log("Mods True");
+                isMods = true;
+            }
+        }
+        console.log("Mengecek status mod")
+        if(!isMods){
+            return false; 
+        }
+        console.log("Mereturn value function")
+        return true;
+    } catch (error) {
+        console.error("Error in modChecker function: ", error);
+        return false
     }
 }

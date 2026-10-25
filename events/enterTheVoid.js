@@ -6,10 +6,10 @@ module.exports = {
     name: discord.Events.MessageCreate,
     async execute(message) {
         if (!message.guild || message.author.bot) return;
-        let guildData;
+        let voidData;
         try {
-            [guildData] = await SqlDB.query(
-                `SELECT * FROM guild_info WHERE guild_id = ?`,
+            [voidData] = await SqlDB.query(
+                `SELECT * FROM void_setting WHERE guild_id = ?`,
                 [message.guild.id]
             );
         } catch (error) {
@@ -20,9 +20,9 @@ module.exports = {
             console.error(error);
             return;
         }
-        if(!guildData[0])return;
-        if(message.channel.id !== guildData[0].void_channel_id) return;
-        const logCh = guildData[0].log_channel_id ? await message.client.channel.fetch(guildData[0].log_channel_id) : message.guild.systemChannel;
+        if(!voidData[0])return;
+        if(message.channel.id !== voidData[0].void_channel_id) return;
+        const logCh = voidData[0].log_channel_id ? await message.client.channels.fetch(voidData[0].log_channel_id) : message.guild.systemChannel;
         if(!message.member.kickable){
             await message.author.send({
                 content: `Anda terdeteksi spam di server **${message.guild.name}**!! harap amankan akun anda dan hapus spam secara manual.\nBot ini tidak dapat mengeluarkan anda dari server! harap hapus spam manual sesuai perintah dari owner!`
@@ -34,10 +34,10 @@ module.exports = {
             });
             return;
         }
-        if(message.channel.id === guildData[0].void_channel_id){
+        if(message.channel.id === voidData[0].void_channel_id){
             try {
                 await SqlDB.query(
-                    `UPDATE guild_info SET kick_count = kick_count + 1 WHERE guild_id = ?`,
+                    `UPDATE void_setting SET kick_count = kick_count + 1 WHERE guild_id = ?`,
                     [message.guild.id]
                 );
             } catch (error) {
@@ -48,8 +48,23 @@ module.exports = {
                 console.error(error);
                 return;
             }
-            const dmContent = guildData[0].guild_invite_link ? 
-            `Anda telah di kick dari server **${message.guild.name}** karena mengirim pesan di channel lubang hitam!\n\nJika anda ingin masuk kembali ke server ini, silahkan gunakan link undangan berikut: ${guildData[0].guild_invite_link}` : 
+            let inviteLink;
+            try {
+                [inviteLink] = await SqlDB.query(
+                    `SELECT guild_invite_link FROM guild_info WHERE guild_id = ?`,
+                    [message.guild.id]
+                );
+            } catch (error) {
+                await interaction.reply({
+                    content: "An error occurred! Please try again later!",
+                    flags: discord.MessageFlags.Ephemeral
+                });
+                console.error(error);
+                return;
+            }
+            console.log(inviteLink[0]);
+            const dmContent = inviteLink[0].guild_invite_link ? 
+            `Anda telah di kick dari server **${message.guild.name}** karena mengirim pesan di channel lubang hitam!\n\nJika anda ingin masuk kembali ke server ini, silahkan gunakan link undangan berikut: ${inviteLink[0].guild_invite_link}` : 
             `Anda telah di kick dari server **${message.guild.name}** karena mengirim pesan di channel lubang hitam!`;
             await message.author.send({
                 content: dmContent
@@ -57,8 +72,8 @@ module.exports = {
         	await message.delete().catch(()=>{});
             await message.guild.members.kick(message.author.id, {reason: "Spam Guard"});
             await embed_voidChMessage(message);
-            const voidCh = await message.guild.channels.cache.get(guildData[0].void_channel_id);
-            const voidMsg = await voidCh.messages.fetch(guildData[0].void_msg_id);
+            const voidCh = await message.guild.channels.cache.get(voidData[0].void_channel_id);
+            const voidMsg = await voidCh.messages.fetch(voidData[0].void_msg_id);
             await voidMsg.edit({
                 embeds: [await embed_voidChMessage(message)]
             });
@@ -75,7 +90,7 @@ async function embed_voidChMessage(message){
     let kickCounts;
     try {
         [kickCounts] = await SqlDB.query(
-            `SELECT kick_count FROM guild_info WHERE guild_id = ?`,
+            `SELECT kick_count FROM void_setting WHERE guild_id = ?`,
             [message.guild.id]
         );
     } catch (error) {
