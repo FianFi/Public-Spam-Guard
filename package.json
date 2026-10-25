@@ -1,11 +1,11 @@
 {
-  "name": "mouri",
+  "name": "SpamGuard",
   "version": "1.0.0",
-  "description": "Bot Discord pribadi milik Fian sebagai projek dan beberapa uji coba bot.",
+  "description": "Void bot to guard your discord server from spammer",
   "license": "ISC",
   "author": "Fian",
   "type": "commonjs",
-  "main": "mouri.js",
+  "main": "spamGuard.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

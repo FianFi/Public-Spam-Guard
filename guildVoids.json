@@ -6,21 +6,5 @@
         "spam_count": 0,
         "spam_guard_channel_id": "",
         "void_msg_id": ""
-    },
-    "1396505097382658149": {
-        "owner_id": "1157914143022657577",
-        "setuper_id": "1157914143022657577",
-        "guild_invite_link": "https://discord.gg/rq6JzgT3rv",
-        "spam_count": 0,
-        "spam_guard_channel_id": "1556270740590952479",
-        "void_msg_id": "1556270742436454450"
-    },
-    "1531213460426326016": {
-        "owner_id": "1157914143022657577",
-        "setuper_id": "1157914143022657577",
-        "guild_invite_link": "https://discord.gg/eye6RcC8v",
-        "spam_count": 0,
-        "spam_guard_channel_id": "1556560131284668466",
-        "void_msg_id": "1556560133062926407"
     }
 }

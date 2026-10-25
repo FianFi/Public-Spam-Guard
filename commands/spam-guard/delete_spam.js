@@ -5,7 +5,7 @@ const SqlDB = require('../../services/connection.js');
 module.exports = {
     data: new discord.SlashCommandBuilder()
         .setName("delete_spam")
-        .setDescription("Menghapus pesan spam dari id yang diberikan.(Beta)[Resiko menghapus msg penting!]")
+        .setDescription("Deleting spam messages from the given ID. (Beta) [Risk of deleting important messages!]")
         .addStringOption(option =>
             option.setName("message_id")
                 .setDescription("ID dari salah satu pesan spam yang ingin dihapus.")
@@ -20,7 +20,7 @@ module.exports = {
             );
         } catch (error) {
             await interaction.reply({
-                content: "Terjadi kesalahan! Harap coba lagi nanti",
+                content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
             });
             console.error(error);
@@ -28,14 +28,14 @@ module.exports = {
         }
         if(!guildData[0]){
             await interaction.reply({
-                content: "Server ini belum di setup untuk fitur spam guard, harap hubungi owner server untuk setup fitur ini.",
+                content: "This server hasn't been set up for the spam guard feature yet, please contact the server owner to set up this feature.",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
         }
         if(interaction.user.id !== guildData[0].owner_id){
             await interaction.reply({
-                content: "Hanya pemilik server dan admin yang dapat menghapus channel void!",
+                content: "Only the server owner and admins can delete spam messages.",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
@@ -45,48 +45,41 @@ module.exports = {
             sampleMsg = await interaction.channel.messages.fetch(messageId);
         }catch(err){
             await interaction.reply({
-                content: "Tidak ada sample msg di channel ini dari ID yang kamu masukkan",
+                content: "There’s no sample msg in this channel from the ID you entered",
                 flags: discord.MessageFlags.Ephemeral
             });
-            console.error("Error occurred while anuing message:", err);
+            console.error("Error occurred while finding message sample:", err);
             return;
         }
         let sampleContent, sampleAttName;
         try{
             sampleContent = sampleMsg.content;
         }catch(err){
-            console.error("Error occurred while anuing message:", err);
+            console.error("Error occurred while finding message sample:", err);
         }
         try{
             sampleAttName = sampleMsg.attachments.map(a => a.name);
         }catch(err){
-            console.error("Error occurred while anuing message:", err);
+            console.error("Error occurred while finding message sample:", err);
         }
         if(!sampleContent && sampleAttName.length === 0){
             await interaction.reply({
-                content: "Tidak ada content dan attachment di message ini!\n harus menyertakan content atau attachment",
+                content: "There's no content or attachment in this message!\nYou need to include content or an attachment",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
         }
         await interaction.reply({
-            content: "Scanning dan deleting sedang berlangsung...",
+            content: "Scanning and deleting in progress...",
             flags: discord.MessageFlags.Ephemeral
         });
         const channelIds = await takeAllChID(interaction, interaction.guild.id);
         const DC = await deleteMessageByIds(interaction, channelIds, sampleMsg);
         await interaction.editReply({
-            content: `Scanning selesai!\n${DC} pesan spam dihapus!`,
+            content: `Scanning complete!\n${DC} spam messages deleted!`,
             flags: discord.MessageFlags.Ephemeral
         }); 
     }
-}
-
-async function jsonDB(){
-    const srcTicketdb = JSON.parse(
-        fs.readFileSync("guildVoids.json", "utf8")
-    );
-    return srcTicketdb;
 }
 async function takeAllChID(interaction, guild_id){
     try {
@@ -101,7 +94,7 @@ async function takeAllChID(interaction, guild_id){
         }
         return [];
     } catch (error) {
-        console.error("Error occurred while anuing message:", error);
+        console.error("Error occurred while finding all channel id:", error);
         return [];
     }
 }
@@ -113,7 +106,7 @@ async function deleteMessageByIds(interaction, channelIds, sampleMsg){
             if(!channel){
                 channel = await interaction.client.channels.fetch(channelId);
             }
-            console.log("mencari di channel "+channel.name)
+            console.log("Finding at "+channel.name)
             const message = await channel.messages.fetch({ limit: 5 });
             for(const msg of message.values()){
                 let sameContent, sameAttachs, sameUser = false;
@@ -138,11 +131,9 @@ async function deleteMessageByIds(interaction, channelIds, sampleMsg){
                 }
             }
         }
-        console.log("endtry dmbi")
         return deleteCount;
     } catch (error) {
-        console.log("error dmbi")
-        console.error("Error occurred while anuing message:", error);
+        console.error("Error occurred while deleting spam message:", error);
         return deleteCount;
     }
 }

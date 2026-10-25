@@ -5,10 +5,10 @@ const SqlDB = require('../../services/connection.js');
 module.exports = {
     data: new discord.SlashCommandBuilder()
         .setName("set_invite_link")
-        .setDescription("Menambahkan link undangan untuk dimunculkan dalam DM bot ke pengguna spam jika mereka di kick.")
+        .setDescription("Adding an invite link to appear in the bot's DM to spam users if they get kicked.")
         .addStringOption(option =>
             option.setName("link")
-                .setDescription("Link undangan untuk bot ini.")
+                .setDescription("This server invitatin link.")
                 .setRequired(true)
         ),
     async execute(interaction) {
@@ -21,7 +21,7 @@ module.exports = {
             );
         } catch (error) {
             await interaction.reply({
-                content: "Terjadi kesalahan! Harap coba lagi nanti",
+                content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
             });
             console.error(error);
@@ -29,21 +29,21 @@ module.exports = {
         }
         if(!guildData[0]){
             await interaction.reply({
-                content: "Server ini belum di setup untuk fitur spam guard, harap hubungi owner server untuk setup fitur ini.",
+                content: "This server hasn't been set up for the spam guard feature yet, please contact the server owner to set up this feature.",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
         }
         if(interaction.user.id !== guildData[0].owner_id){
             await interaction.reply({
-                content: "Hanya pemilik server yang dapat mengatur link undangan untuk bot ini.",
+                content: "Only the server owner can set the invitation link for this bot.",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
         }
         if(guildData[0].guild_invite_link !== null){
             await interaction.reply({
-                content: "Sudah ada invite link yang dicantumkan di bot ini!",
+                content: "There’s already an invite link listed in this bot!",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
@@ -57,22 +57,15 @@ module.exports = {
             );
         } catch (error) {
             await interaction.reply({
-                content: "Terjadi kesalahan! Harap coba lagi nanti",
+                content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
             });
             console.error(error);
             return;
         }
         await interaction.reply({
-            content: `Link undangan telah disetel: ${inviteLink}`,
+            content: `The invitation link has been set: ${inviteLink}`,
             flags: discord.MessageFlags.Ephemeral
         }); 
     }
-}
-
-async function jsonDB(){
-    const srcTicketdb = JSON.parse(
-        fs.readFileSync("guildVoids.json", "utf8")
-    );
-    return srcTicketdb;
 }

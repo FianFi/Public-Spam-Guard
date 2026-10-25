@@ -21,11 +21,12 @@ for (const folder of commandFolders) {
 		} else {
 			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
 		}
-		// console.log(commands)
 	}
 	// console.log("deploy command 1");
 }
-
+// for(const command of commands){
+// 	console.log(command.name);
+// }
 // Construct and prepare an instance of the REST module
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
@@ -34,7 +35,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 	// console.log("deploy command 2");
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
+		
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
 

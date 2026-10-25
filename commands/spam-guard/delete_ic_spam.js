@@ -5,10 +5,10 @@ const SqlDB = require('../../services/connection.js');
 module.exports = {
     data: new discord.SlashCommandBuilder()
         .setName("delete_ic_spam")
-        .setDescription("Menghapus pesan spam di 1 channel dari id yang diberikan.(Beta)[Resiko menghapus msg penting!]")
+        .setDescription("Deleting spam messages in 1 channel from the given ID. (Beta) [Risk of deleting important messages!]")
         .addStringOption(option =>
             option.setName("message_id")
-                .setDescription("ID dari salah satu pesan spam yang ingin dihapus.")
+                .setDescription("The ID of one of the spam messages you want to delete.")
                 .setRequired(true)),
     async execute(interaction){
         const messageId = interaction.options.getString("message_id");
@@ -20,7 +20,7 @@ module.exports = {
             );
         } catch (error) {
             await interaction.reply({
-                content: "Terjadi kesalahan! Harap coba lagi nanti",
+                content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
             });
             console.error(error);
@@ -28,14 +28,14 @@ module.exports = {
         }
         if(!guildData[0]){
             await interaction.reply({
-                content: "Server ini belum di setup untuk fitur spam guard, harap hubungi owner server untuk setup fitur ini.",
+                content: "This server hasn't been set up for the spam guard feature yet, please contact the server owner to set up this feature.",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
         }
         if(interaction.user.id !== guildData[0].owner_id){
             await interaction.reply({
-                content: "Hanya pemilik server dan admin yang dapat pesan spam manual!",
+                content: "Only the server owner and admins can manually delete spam messages!",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
@@ -45,7 +45,7 @@ module.exports = {
             sampleMsg = await interaction.channel.messages.fetch(messageId);
         }catch(err){
             await interaction.reply({
-                content: "Tidak ada sample msg di channel ini dari ID yang kamu masukkan",
+                content: "There’s no sample msg in this channel from the ID you entered",
                 flags: discord.MessageFlags.Ephemeral
             });
             console.error("Error occurred while anuing message:", err);
@@ -53,10 +53,10 @@ module.exports = {
         }
         if(!sampleMsg){
             await interaction.reply({
-                content: "Tidak ada sample msg di channel ini dari ID yang kamu masukkan",
+                content: "There’s no sample msg in this channel from the ID you entered",
                 flags: discord.MessageFlags.Ephemeral
             });
-            console.error("Error occurred while anuing message:", err);
+            console.error("Error occurred while finding message sample:", err);
             return;
         }
         let sampleContent, sampleAttName;
@@ -64,22 +64,22 @@ module.exports = {
         try{
             sampleAttName = sampleMsg.attachments.map(a => a.name);
         }catch(err){
-            console.error("Error occurred while anuing message:", err);
+            console.error("Error occurred while finding message sample:", err);
         }
         if(!sampleContent && sampleAttName.length === 0){
             await interaction.reply({
-                content: "Tidak ada content dan attachment di message ini!\n harus menyertakan content atau attachment",
+                content: "There's no content or attachment in this message!\nYou need to include some content or an attachment",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
         }
         await interaction.reply({
-            content: "Scanning dan deleting sedang berlangsung...",
+            content: "Scanning and deleting in progress...",
             flags: discord.MessageFlags.Ephemeral
         });
         const DC = await deleteMessageByIds(interaction, sampleMsg);
         await interaction.editReply({
-            content: `Scanning selesai!\n${DC} pesan spam dihapus!`,
+            content: `Scanning complete!\n${DC} spam messages deleted!`,
             flags: discord.MessageFlags.Ephemeral
         }); 
     }
@@ -93,12 +93,12 @@ async function deleteMessageByIds(interaction, sampleMsg){
         if(!channel){
             channel = await interaction.client.channels.fetch(interaction.channel.id);
         }
-        console.log("mencari di channel "+channel.name)
+        console.log("in "+channel.name)
         let lastId;
         const options = {limit:25};
         for(;;){
             if(notSpamIntv >= 5){
-                console.log("Pesan spam ter-intervensi sebanyak "+notSpamIntv+"! Scan dihentikan.");
+                console.log("Spam messages were intercepted as many as "+notSpamIntv+"! The scan was stopped.");
                 return deleteCount;
             }
             if(lastId){
@@ -106,7 +106,7 @@ async function deleteMessageByIds(interaction, sampleMsg){
             }
             const messages = await channel.messages.fetch(options);
             if(!messages){
-                console.log("Tidak ada pesan yang tersedia di channel ini!");
+                console.log("No messages are available in this channel!");
                 return deleteCount;
             }
             for(const [messageId, message] of messages){
@@ -132,19 +132,16 @@ async function deleteMessageByIds(interaction, sampleMsg){
                         notSpamIntv = 0;
                     }else{
                         notSpamIntv++
-                        console.log("Pesan tidak terdeteksi sebagai spam: "+messageId);
+                        console.log("Message not detected as spam: "+messageId);
                     }
                 }else{
                     notSpamIntv++
-                    console.log("Pesan tidak terdeteksi sebagai spam: "+messageId);
+                    console.log("Message not detected as spam: "+messageId);
                 }
             }
         }
-        console.log("endtry dmbi")
-        return deleteCount;
     } catch (error) {
-        console.log("error dmbi")
-        console.error("Error occurred while anuing message:", error);
+        console.error("Error occurred while deleting spam message:", error);
         return deleteCount;
     }
 }

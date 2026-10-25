@@ -5,7 +5,7 @@ const SqlDB = require('../../services/connection.js');
 module.exports = {
     data: new discord.SlashCommandBuilder()
         .setName("delete_void")
-        .setDescription("Menghapus lubang hitam untuk bot ini."),
+        .setDescription("Removing void feature for this bot."),
     async execute(interaction) {
         let guildData;
         try {
@@ -15,7 +15,7 @@ module.exports = {
             );
         } catch (error) {
             await interaction.reply({
-                content: "Terjadi kesalahan! Harap coba lagi nanti",
+                content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
             });
             console.error(error);
@@ -23,21 +23,21 @@ module.exports = {
         }
         if(!guildData[0]){
             await interaction.reply({
-                content: "Server ini belum di setup untuk fitur spam guard, harap hubungi owner server untuk setup fitur ini.",
+                content: "This server hasn't been set up for the spam guard feature yet, please contact the server owner to set up this feature.",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
         }
         if(interaction.user.id !== guildData[0].owner_id){
             await interaction.reply({
-                content: "Hanya pemilik server dan admin yang dapat menghapus channel void!",
+                content: "Only the server owner and admins can delete void channels!",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
         }
         if(guildData[0].void_channel_id === null){
             await interaction.reply({
-                content: "Belum ada void channel yang disetup",
+                content: "No void channel has been set up yet",
                 flags: discord.MessageFlags.Ephemeral
             });
             return;
@@ -58,21 +58,15 @@ module.exports = {
             );
         } catch (error) {
             await interaction.reply({
-                content: "Terjadi kesalahan! Harap coba lagi nanti",
+                content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
             });
             console.error(error);
             return;
         }
         await interaction.reply({
-            content: "Channel void berhasil dihapus.",
+            content: "The void channel has been successfully deleted.",
             flags: discord.MessageFlags.Ephemeral
         });
     }
-}
-async function jsonDB(){
-    const srcTicketdb = JSON.parse(
-        fs.readFileSync("guildVoids.json", "utf8")
-    );
-    return srcTicketdb;
 }

@@ -1,4 +1,3 @@
-// Require the necessary discord.js classes
 require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
@@ -6,7 +5,6 @@ const { Client, Events, GatewayIntentBits, Collection, MessageFlags } = require(
 const commands = require('./events/commandHandler.js');   
 const restart = require('./deploy-commands.js');   
 
-// Create a new client instance
 const client = new Client({ intents: [
 	GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -14,12 +12,6 @@ const client = new Client({ intents: [
 ] });
 
 client.commands = commands;
-// When the client is ready, run this code (only once).
-// The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
-// It makes some properties non-nullable.
-// client.once(Events.ClientReady, (interaction) => {
-	// 	console.log(`Ready! Logged in as ${interaction.user.tag}`);
-// });
 
 const eventFiles = fs
 	.readdirSync('./events')
@@ -33,13 +25,9 @@ for(const file of eventFiles){
     console.log(`Loaded event: ${file}`);
 }
 
-// client.on(Events.MessageCreate, message => {
-// 	event.clientMessageCreate(message)
-// });
 client.on(Events.InteractionCreate, async (interaction) => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = interaction.client.commands.get(interaction.commandName);
-	// console.log(command)
 	if (!command) {
 		console.error(`No command matching ${interaction.commandName} was found.`);
 		return;
@@ -61,8 +49,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
 				});
 			}
 		} catch (replyError) {
-			// Tangkap jika token interaksi sudah expired agar bot TIDAK CRASH
-        	console.error('Gagal mengirim pesan error ke pengguna (interaksi expired):', replyError.message);
+			// Catch while interaction token has expired
+        	console.error('Failed sending error message to user (expired interaction):', replyError.message);
 		}
 	}
 });
