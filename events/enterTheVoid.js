@@ -14,7 +14,7 @@ module.exports = {
             );
         } catch (error) {
             await message.guild.systemChannel.send({
-                content: "Terjadi kesalahan dengan bot guardian! Harap hapus spam manual dan beri laporan!",
+                content: "An error occurred! Please delete the spam manually and file a report!",
                 flags: discord.MessageFlags.Ephemeral
             });
             console.error(error);
@@ -25,12 +25,13 @@ module.exports = {
         const logCh = voidData[0].log_channel_id ? await message.client.channels.fetch(voidData[0].log_channel_id) : message.guild.systemChannel;
         if(!message.member.kickable){
             await message.author.send({
-                content: `Anda terdeteksi spam di server **${message.guild.name}**!! harap amankan akun anda dan hapus spam secara manual.\nBot ini tidak dapat mengeluarkan anda dari server! harap hapus spam manual sesuai perintah dari owner!`
+                content: `You have been detected as spam on the **${message.guild.name}** server!! please secure your account and delete the spam manually.\n
+                This bot cannot kick you out of the server! please manually delete the spam as instructed by the owner!`
             });
         	await message.delete().catch(()=>{});
             if(!logCh) return;
             await logCh.send({
-                content: `**<@${message.author.id}>** tidak bisa dikeluarkan dari server ini! Harap hapus manual pesan spam yang dikirim!`
+                content: `**<@${message.author.id}>** can't be kicked from this server! Please manually delete the spam messages that were sent!`
             });
             return;
         }
@@ -42,7 +43,7 @@ module.exports = {
                 );
             } catch (error) {
                 await logCh.send({
-                    content: "Terjadi kesalahan dengan bot guardian! Harap hapus spam manual dan beri laporan!",
+                    content: "An error occurred! Please delete the spam manually and file a report!",
                     flags: discord.MessageFlags.Ephemeral
                 });
                 console.error(error);
@@ -55,17 +56,14 @@ module.exports = {
                     [message.guild.id]
                 );
             } catch (error) {
-                await interaction.reply({
-                    content: "An error occurred! Please try again later!",
-                    flags: discord.MessageFlags.Ephemeral
-                });
                 console.error(error);
-                return;
             }
-            console.log(inviteLink[0]);
-            const dmContent = inviteLink[0].guild_invite_link ? 
-            `Anda telah di kick dari server **${message.guild.name}** karena mengirim pesan di channel lubang hitam!\n\nJika anda ingin masuk kembali ke server ini, silahkan gunakan link undangan berikut: ${inviteLink[0].guild_invite_link}` : 
-            `Anda telah di kick dari server **${message.guild.name}** karena mengirim pesan di channel lubang hitam!`;
+            let dmContent = `You have been kicked from the server **${message.guild.name}** for sending messages in the Void channel!`;
+            if(inviteLink){
+                dmContent = inviteLink[0].guild_invite_link ? 
+                `You have been kicked from the server **${message.guild.name}** for sending messages in the Void channel!\n\nIf you want to join this server again, feel free to use the following invite link: ${inviteLink[0].guild_invite_link}` : 
+                dmContent;
+            }
             await message.author.send({
                 content: dmContent
             }).catch(()=>{});
@@ -103,7 +101,8 @@ async function embed_voidChMessage(message){
             .addFields(
                 {
                 name: "",
-                value: `Semua yang mengirim pesan di channel ini akan di banned secara otomatis oleh bot ini!\nJangan kirim pesan apapun di channel ini!`
+                value: `Everyone who sends a message in this channel will be automatically banned by this bot\n
+                Don't send any messages in this channel!`
                 },
                 {
                     name: "Kicks count: ",

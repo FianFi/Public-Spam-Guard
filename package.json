@@ -2,12 +2,15 @@
   "name": "SpamGuard",
   "version": "1.0.0",
   "description": "Void bot to guard your discord server from spammer",
-  "license": "ISC",
+  "license": "Single-use License. Don't use this script for commerce!",
   "author": "Fian",
   "type": "commonjs",
   "main": "spamGuard.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node spamGuard.js",
+    "dev": "nodemon spamGuard.js",
+    "deploy": "node deploy-commands.js",
+    "dellComm": "node delall-commands.js"
   },
   "dependencies": {
     "discord.js": "^14.27.0",

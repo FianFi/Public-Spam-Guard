@@ -1,9 +1,7 @@
 require('dotenv').config();
 const fs = require('node:fs');
-const path = require('node:path');
-const { Client, Events, GatewayIntentBits, Collection, MessageFlags } = require('discord.js');
-const commands = require('./events/commandHandler.js');   
-const restart = require('./deploy-commands.js');   
+const { Client, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
+const commands = require('./handler/commandHandler.js');
 
 const client = new Client({ intents: [
 	GatewayIntentBits.Guilds,

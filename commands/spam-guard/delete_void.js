@@ -10,7 +10,14 @@ module.exports = {
         let guildData;
         try {
             [guildData] = await SqlDB.query(
-                `SELECT * FROM guild_info WHERE guild_id = ?`,
+                `SELECT 
+                guild_info.guild_id,
+                guild_info.owner_id, 
+                void_setting.void_channel_id 
+                FROM guild_info 
+                JOIN void_setting 
+                ON guild_info.guild_id = void_setting.guild_id 
+                WHERE guild_info.guild_id = ?`,
                 [interaction.guild.id]
             );
         } catch (error) {
@@ -45,15 +52,12 @@ module.exports = {
         }
         const voidCh = await interaction.guild.channels.cache.get(guildData[0].void_channel_id);
         try {
-            await voidCh.delete();
-        } catch (error) {
-            console.error(error);
-        }
-        try {
             await SqlDB.query(
-                `UPDATE guild_info 
+                `UPDATE void_setting 
                 SET void_channel_id = null,
-                void_msg_id = null
+                void_msg_id = null,
+                void_enabled = FALSE,
+                kick_count = 0
                 WHERE guild_id = ?`,
                 [interaction.guild.id]
             );
@@ -64,6 +68,11 @@ module.exports = {
             });
             console.error(error);
             return;
+        }
+        try {
+            await voidCh.delete();
+        } catch (error) {
+            console.error(error);
         }
         await interaction.reply({
             content: "The void channel has been successfully deleted.",
