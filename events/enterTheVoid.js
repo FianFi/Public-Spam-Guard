@@ -27,7 +27,7 @@ module.exports = {
             await message.author.send({
                 content: `You have been detected as spam on the **${message.guild.name}** server!! please secure your account and delete the spam manually.\n
                 This bot cannot kick you out of the server! please manually delete the spam as instructed by the owner!`
-            });
+            }).catch((error)=>{console.error(error)});
         	await message.delete().catch(()=>{});
             if(!logCh) return;
             await logCh.send({
@@ -66,7 +66,7 @@ module.exports = {
             }
             await message.author.send({
                 content: dmContent
-            }).catch(()=>{});
+            }).catch((error)=>{console.log(error)});
         	await message.delete().catch(()=>{});
             await message.guild.members.kick(message.author.id, {reason: "Spam Guard"});
             await embed_voidChMessage(message);
@@ -77,12 +77,6 @@ module.exports = {
             });
         }
     }
-}
-async function jsonDB(){
-    const srcTicketdb = JSON.parse(
-        fs.readFileSync("guildVoids.json", "utf8")
-    );
-    return srcTicketdb;
 }
 async function embed_voidChMessage(message){
     let kickCounts;
@@ -101,8 +95,7 @@ async function embed_voidChMessage(message){
             .addFields(
                 {
                 name: "",
-                value: `Everyone who sends a message in this channel will be automatically banned by this bot\n
-                Don't send any messages in this channel!`
+                value: `Everyone who sends a message in this channel will be automatically banned by this bot\nDon't send any messages in this channel!`
                 },
                 {
                     name: "Kicks count: ",

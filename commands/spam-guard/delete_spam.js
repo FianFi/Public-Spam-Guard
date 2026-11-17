@@ -1,6 +1,6 @@
 const discord = require('discord.js');
-const fs = require('fs');
 const SqlDB = require('../../services/connection.js');
+const { modCheck } = require('./utils/modChecker.js');
 
 module.exports = {
     data: new discord.SlashCommandBuilder()
@@ -33,7 +33,7 @@ module.exports = {
             });
             return;
         }
-        const isMod = await modChecker(interaction);
+        const isMod = await modCheck(interaction);
         if(interaction.user.id !== guildData[0].owner_id && !isMod){
             await interaction.reply({
                 content: "Only the server owner and admins can delete spam messages.",

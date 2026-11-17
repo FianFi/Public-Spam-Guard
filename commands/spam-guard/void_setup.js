@@ -1,5 +1,5 @@
 const discord = require('discord.js');
-const fs = require('fs');
+const {modCheck} = require('./utils/modChecker.js')
 const SqlDB = require('../../services/connection.js');
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
             });
             return;
         }
-        const isMod = await modChecker(interaction);
+        const isMod = await modCheck(interaction);
         if(interaction.user.id !== guildData[0].owner_id && !isMod){
             await interaction.reply({
                 content: "Only the server owner and admins can use this command.",
@@ -96,7 +96,7 @@ async function channelSetup(interaction){
     });
     const voidMsg = await voidCh.send({
         embeds: [await embed_voidChMessage(interaction)],
-        });
+    });
     return{
         voidId: voidCh.id,
         voidMsgId: voidMsg.id

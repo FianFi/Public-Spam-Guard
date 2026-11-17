@@ -1,0 +1,11 @@
+const discord = require("discord.js");
+
+module.exports = {
+    name : discord.Events.MessageCreate,
+    async execute(message){
+        const sender = await message.guild.members.fetch(message.author.id);
+        // console.log(message.author.id);
+        // console.log(message);
+        console.log(sender.roles.cache.has("1432854548644630609"));
+    }
+}

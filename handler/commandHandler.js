@@ -3,12 +3,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const commands = new Collection(); 
-// Masuk path D:\Fian\Discord\Bot\Mouri\commands
 const foldersPath = path.join(__dirname, '../commands');
-// console.log(foldersPath);
-// Melihat folders yang ada di path D:\Fian\Discord\Bot\Mouri\commands
 const commandFolders = fs.readdirSync(foldersPath);
-console.log("command handler 1")
+
 for (const folder of commandFolders) {
 	// Masuk path commandFolders
 	const commandsPath = path.join(foldersPath, folder);

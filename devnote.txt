@@ -1,0 +1,8 @@
+# Possible error
+1. Empty embed field at
+    a. setupDropdown.js [L272]
+    b. setup.js [L152]
+    c. enterTheVoid.js [L97]
+    d. voidSetup.js [L146]
+2. Infinite loop at delete_ic_spam.js [L100-113] 
+3. Better don't use or remove delete_spam and delete_ic_spam, it will use your rate limit.
