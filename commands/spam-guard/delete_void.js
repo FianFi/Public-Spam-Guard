@@ -21,6 +21,7 @@ module.exports = {
                 [interaction.guild.id]
             );
         } catch (error) {
+            Logger.error(interaction.guild.id, `[DB] ${error}`);
             await interaction.reply({
                 content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
@@ -57,6 +58,7 @@ module.exports = {
                 [interaction.guild.id]
             );
         } catch (error) {
+            Logger.error(interaction.guild.id, `[DB] ${error}`);
             await interaction.reply({
                 content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
@@ -67,6 +69,7 @@ module.exports = {
         try {
             await voidCh.delete();
         } catch (error) {
+            Logger.error(interaction.guild.id, `[DB] ${error}`);
             console.error(error);
         }
         Logger.info(interaction.guild.id, `[VOID_DELETE] Void channel has deleted by ${interaction.user.username}(${interaction.user.id})`);

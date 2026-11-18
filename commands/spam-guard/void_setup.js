@@ -124,6 +124,7 @@ async function embed_alreadySetup(interaction){
             .setColor([187, 33, 36])
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
+            .setFooter({text:"FianBot | FiStuff"})
     }
     return new EmbedBuilder()
             .setColor([76, 175, 80])
@@ -144,21 +145,23 @@ async function embed_alreadySetup(interaction){
                     inline: true
                 }
             )
+            .setFooter({text:"FianBot | FiStuff"})
 }
 async function embed_voidChMessage(){
     return new EmbedBuilder()
-            .setColor([76, 175, 80])
-            .setTitle("Void Channel!")
-            .addFields(
-                {
-                name: "",
-                value: `Everyone who sends a message in this channel will be automatically banned by this bot!\nDon't send any messages in this channel!`
-                },
-                {
-                    name: "Kicks count: ",
-                    value: "0"
-                }
-            )
+        .setColor([76, 175, 80])
+        .setTitle("Void Channel!")
+        .addFields(
+            {
+            name: "",
+            value: `Everyone who sends a message in this channel will be automatically banned by this bot!\nDon't send any messages in this channel!`
+            },
+            {
+                name: "Kicks count: ",
+                value: "0"
+            }
+        )
+        .setFooter({text:"FianBot | FiStuff"})
 }
 async function voidSetupComponents(){
     const dropdown = new StringSelectMenuBuilder()

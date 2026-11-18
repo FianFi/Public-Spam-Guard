@@ -129,6 +129,7 @@ async function setModEmbed(interaction){
             .setColor([187, 33, 36])
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
+            .setFooter({text:"FianBot | FiStuff"})
     }
     return new discord.EmbedBuilder()
         .setColor([76, 175, 80])
@@ -140,6 +141,7 @@ async function setModEmbed(interaction){
                 value: `${guildData[0].admin_role ? `<@&${guildData[0].admin_role}>` : `No Mod`}`
             }
         )
+        .setFooter({text:"FianBot | FiStuff"})
 }
 async function setLogChEmbed(interaction){
     let guildData;
@@ -159,6 +161,7 @@ async function setLogChEmbed(interaction){
             .setColor([187, 33, 36])
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
+            .setFooter({text:"FianBot | FiStuff"})
     }
     return new discord.EmbedBuilder()
         .setColor([76, 175, 80])
@@ -170,6 +173,7 @@ async function setLogChEmbed(interaction){
                 value: `${guildData[0].log_channel_id ? `<#${guildData[0].log_channel_id}>` : "Default at System Log"}`
             }
         )
+        .setFooter({text:"FianBot | FiStuff"})
 }
 async function setupComponents(){
     const dropdown = new discord.StringSelectMenuBuilder()
@@ -236,6 +240,7 @@ async function guildInformationEmbed(interaction){
             .setColor([187, 33, 36])
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
+            .setFooter({text:"FianBot | FiStuff"})
     }
     const fsaUnixTime = Math.floor(
         new Date(guildData[0].first_setup_at).getTime() / 1000
@@ -290,4 +295,5 @@ async function guildInformationEmbed(interaction){
                     inline: true
                 }
             )
+            .setFooter({text:"FianBot | FiStuff"})
 }

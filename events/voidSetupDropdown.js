@@ -203,6 +203,7 @@ async function embed_alreadySetup(interaction){
             .setColor([187, 33, 36])
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
+            .setFooter({text:"FianBot | FiStuff"})
     }
     return new EmbedBuilder()
             .setColor([76, 175, 80])
@@ -223,4 +224,5 @@ async function embed_alreadySetup(interaction){
                     inline: true
                 }
             )
+            .setFooter({text:"FianBot | FiStuff"})
 }

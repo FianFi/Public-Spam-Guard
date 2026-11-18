@@ -24,6 +24,7 @@ module.exports = {
                 content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
             });
+            Logger.error(interaction.guild.id, `[DB] ${error}`);
             console.error(error);
             return;
         }
@@ -61,6 +62,7 @@ module.exports = {
                 content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
             });
+            Logger.error(interaction.guild.id, `[DB] ${error}`);
             console.error(error);
             return;
         }

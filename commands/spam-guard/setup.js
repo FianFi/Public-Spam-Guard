@@ -113,7 +113,8 @@ async function guildInformationEmbed(interaction){
         return new discord.EmbedBuilder()
             .setColor([187, 33, 36])
             .setTitle("Error")
-            .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.");
+            .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
+            .setFooter({text:"FianBot | FiStuff"});
     }
     const fsaUnixTime = Math.floor(
         new Date(guildData[0].first_setup_at).getTime() / 1000
@@ -125,49 +126,50 @@ async function guildInformationEmbed(interaction){
     );
     const peaText = `<t:${peaUnixTime}:R>`;
     return new discord.EmbedBuilder()
-            .setColor([76, 175, 80])
-            .setTitle("Guild Information")
-            .setDescription("Your server has been set up, here’s the server information recorded in the bot")
-            .addFields(
-                {
-                    name: "Server name:",
-                    value: `${guildData[0].guild_name}`,
-                    inline: true
-                },
-                {
-                    name: "Owner:",
-                    value: `<@${guildData[0].owner_id}>`,
-                    inline: true
-                },
-                {
-                    name: "Bot Moderator role:",
-                    value: `${guildData[0].admin_role ? `<@&${guildData[0].admin_role}>` : `No Mod`}`
-                },
-                {
-                    name: "First setup:",
-                    value: fsaText,
-                    inline: true
-                },
-                {
-                    name: "Bot log channel:",
-                    value: `${guildData[0].log_channel_id ? `<#${guildData[0].log_channel_id}>` : "Default at System Log"}`,
-                    inline: true
-                },
-                {
-                    name: "",
-                    value: ``
-                },
-                {
-                    name: "Premium:",
-                    value: `${guildData[0].is_premium ? "True" : "False"}`,
-                    inline: true
-                },
-                {
-                    name: "Premium end:",
-                    value: `${guildData[0].premium_expires_at ? peaText : "-"}`,
-                    inline: true
-                }
-            )
+        .setColor([76, 175, 80])
+        .setTitle("Guild Information")
+        .setDescription("Your server has been set up, here’s the server information recorded in the bot")
+        .addFields(
+            {
+                name: "Server name:",
+                value: `${guildData[0].guild_name}`,
+                inline: true
+            },
+            {
+                name: "Owner:",
+                value: `<@${guildData[0].owner_id}>`,
+                inline: true
+            },
+            {
+                name: "Bot Moderator role:",
+                value: `${guildData[0].admin_role ? `<@&${guildData[0].admin_role}>` : `No Mod`}`
+            },
+            {
+                name: "First setup:",
+                value: fsaText,
+                inline: true
+            },
+            {
+                name: "Bot log channel:",
+                value: `${guildData[0].log_channel_id ? `<#${guildData[0].log_channel_id}>` : "Default at System Log"}`,
+                inline: true
+            },
+            {
+                name: "",
+                value: ``
+            },
+            {
+                name: "Premium:",
+                value: `${guildData[0].is_premium ? "True" : "False"}`,
+                inline: true
+            },
+            {
+                name: "Premium end:",
+                value: `${guildData[0].premium_expires_at ? peaText : "-"}`,
+                inline: true
+            }
+        )
+        .setFooter({text:"FianBot | FiStuff"})
 }
 async function setupComponents(){
     const dropdown = new discord.StringSelectMenuBuilder()

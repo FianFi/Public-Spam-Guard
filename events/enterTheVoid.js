@@ -138,4 +138,5 @@ async function embed_voidChMessage(message){
                     value: kickCounts ? `${kickCounts[0].kick_count}` : `NotSure`
                 }
             )
+            .setFooter({text:"FianBot | FiStuff"})
 }
