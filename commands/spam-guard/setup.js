@@ -27,6 +27,7 @@ module.exports = {
                 content: "An error occurred! Please try again later!",
                 flags: discord.MessageFlags.Ephemeral
             });
+            Logger.error(interaction.guild.id, `[DB] ${error}`);
             console.error(error);
             return;
         }
@@ -55,6 +56,7 @@ module.exports = {
                     reason: 'This bot creates this role during setup'
                 });
             } catch (error) {
+                Logger.error(interaction.guild.id, `[DB] ${error}`);
                 console.error("Error occurred while inserting table:",error)
                 await interaction.reply({
                     content: "An error occurred! Please try again later!",
@@ -70,6 +72,7 @@ module.exports = {
                     [guildId, guildName, guildOwnerId, adminRoleId]
                 )
             } catch (error) {
+                Logger.error(interaction.guild.id, `[DB] ${error}`);
                 console.error("Error occurred while inserting table:",error)
                 await interaction.reply({
                     content: "An error occurred! Please try again later!",
@@ -78,6 +81,7 @@ module.exports = {
                 return;
             }
             if(insertStatus.affectedRows === 1){
+                Logger.info(interaction.guild.id, `[SERV_SETUP] Server setuped by ${interaction.user.username}(${interaction.user.id})`);
                 await interaction.reply({
                     content: "Server setup was successful!\nYou can adjust the moderator role however you like",
                     flags: discord.MessageFlags.Ephemeral
@@ -100,6 +104,7 @@ async function guildInformationEmbed(interaction){
             [interaction.guild.id]
         );
     } catch (error) {
+        Logger.error(interaction.guild.id, `[DB] ${error}`);
         await interaction.reply({
             content: "An error occurred! Please try again later!",
             flags: discord.MessageFlags.Ephemeral

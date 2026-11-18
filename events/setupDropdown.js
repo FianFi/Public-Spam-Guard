@@ -1,4 +1,3 @@
-const config = require('../config.json')
 const discord = require('discord.js');
 const SqlDB = require('../services/connection.js');
 
@@ -6,20 +5,21 @@ module.exports = {
     name: discord.Events.InteractionCreate,
     async execute(interaction){ 
         if(!interaction.isStringSelectMenu() && !interaction.isButton() && !interaction.isRoleSelectMenu() && !interaction.isChannelSelectMenu()) return;
-        let guildData;
-        try {
-            [guildData] = await SqlDB.query(
-                `SELECT * FROM guild_info WHERE guild_id = ?`,
-                [interaction.guild.id]
-            );
-        } catch (error) {
-            await interaction.reply({
-                content: "An error occurred! Please try again later!",
-                flags: discord.MessageFlags.Ephemeral
-            });
-            console.error(error);
-            return;
-        }
+        // let guildData;
+        // try {
+        //     [guildData] = await SqlDB.query(
+        //         `SELECT * FROM guild_info WHERE guild_id = ?`,
+        //         [interaction.guild.id]
+        //     );
+        // } catch (error) {
+        //     await interaction.reply({
+        //         content: "An error occurred! Please try again later!",
+        //         flags: discord.MessageFlags.Ephemeral
+        //     });
+        //     Logger.error(interaction.guild.id, `[DB] ${error}`);
+        //     console.error(error);
+        //     return;
+        // }
         if(interaction.user.id !== interaction.guild.ownerId) return;
         console.log(interaction.customId); 
         if(interaction.customId === "pick_setup_menu"){
@@ -65,6 +65,7 @@ module.exports = {
                     [interaction.values[0], interaction.guild.id]
                 )
             } catch (error) {
+                Logger.error(interaction.guild.id, `[DB] ${error}`);
                 console.error("Error occurred while updating table:",error)
                 await interaction.reply({
                     content: "An error occurred! Please try again later!",
@@ -72,6 +73,7 @@ module.exports = {
                 });
                 return;
             }
+            Logger.info(interaction.guild.id, `[SETUP] Mod role changed to ${interaction.values[0]} by ${interaction.user.username} (${interaction.user.id})`);
             const smEmbed = await setModEmbed(interaction);
             await interaction.update({
                 content: "",
@@ -88,6 +90,7 @@ module.exports = {
                     [interaction.values[0], interaction.guild.id]
                 )
             } catch (error) {
+                Logger.error(interaction.guild.id, `[DB] ${error}`);
                 console.error("Error occurred while updating table:",error)
                 await interaction.reply({
                     content: "An error occurred! Please try again later!",
@@ -95,6 +98,7 @@ module.exports = {
                 });
                 return;
             }
+            Logger.info(interaction.guild.id, `[SETUP] BotLogCh changed to ${interaction.values[0]} by ${interaction.user.username} (${interaction.user.id})`);
             const slEmbed = await setLogChEmbed(interaction);
             await interaction.update({
                 content: "",
@@ -115,6 +119,7 @@ async function setModEmbed(interaction){
             [interaction.guild.id]
         );
     } catch (error) {
+        Logger.error(interaction.guild.id, `[DB] ${error}`);
         await interaction.reply({
             content: "An error occurred! Please try again later!",
             flags: discord.MessageFlags.Ephemeral
@@ -144,6 +149,7 @@ async function setLogChEmbed(interaction){
             [interaction.guild.id]
         );
     } catch (error) {
+        Logger.error(interaction.guild.id, `[DB] ${error}`);
         await interaction.reply({
             content: "An error occurred! Please try again later!",
             flags: discord.MessageFlags.Ephemeral
@@ -220,6 +226,7 @@ async function guildInformationEmbed(interaction){
             [interaction.guild.id]
         );
     } catch (error) {
+        Logger.error(interaction.guild.id, `[DB] ${error}`);
         await interaction.reply({
             content: "An error occurred! Please try again later!",
             flags: discord.MessageFlags.Ephemeral

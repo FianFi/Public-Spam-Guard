@@ -53,12 +53,7 @@ module.exports = {
         const voidCh = await interaction.guild.channels.cache.get(guildData[0].void_channel_id);
         try {
             await SqlDB.query(
-                `UPDATE void_setting 
-                SET void_channel_id = null,
-                void_msg_id = null,
-                void_enabled = FALSE,
-                kick_count = 0
-                WHERE guild_id = ?`,
+                `DELETE FROM void_setting WHERE void_setting.guild_id = ?`,
                 [interaction.guild.id]
             );
         } catch (error) {
@@ -74,42 +69,10 @@ module.exports = {
         } catch (error) {
             console.error(error);
         }
+        Logger.info(interaction.guild.id, `[VOID_DELETE] Void channel has deleted by ${interaction.user.username}(${interaction.user.id})`);
         await interaction.reply({
             content: "The void channel has been successfully deleted.",
             flags: discord.MessageFlags.Ephemeral
         });
-    }
-}
-async function modChecker(interaction) {
-    try {
-        console.log("Menjalankan prosedur pengecekan status mod checker");
-        const [modRole] = await SqlDB.query(
-            "SELECT `admin_role` FROM guild_info WHERE `guild_id` = ?",
-            [interaction.guild.id]
-        ) 
-        const clicker = await interaction.guild.members.fetch(interaction.user.id);
-        const roles = clicker.roles.cache
-            .filter(role => role.id !== interaction.guild.id) // exclude @everyone
-            .map(role => ({
-                role: role.id,
-                name: role.name
-            }));
-        const tMods = modRole[0].admin_role;
-        let isMods = false;
-        for(const role of roles){
-            if(tMods.includes(role.role)){
-                console.log("Mods True");
-                isMods = true;
-            }
-        }
-        console.log("Mengecek status mod")
-        if(!isMods){
-            return false; 
-        }
-        console.log("Mereturn value function")
-        return true;
-    } catch (error) {
-        console.error("Error in modChecker function: ", error);
-        return false
     }
 }

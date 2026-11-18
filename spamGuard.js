@@ -1,3 +1,5 @@
+const { Logger } = require('./handler/botLogger.js');
+globalThis.Logger = Logger;
 require('dotenv').config();
 const fs = require('node:fs');
 const { Client, Events, GatewayIntentBits, MessageFlags } = require('discord.js');

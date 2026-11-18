@@ -1,9 +1,9 @@
-const discord = require('discord.js');
+const {SlashCommandBuilder, MessageFlags, ChannelType, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonStyle, ButtonBuilder} = require('discord.js');
 const {modCheck} = require('./utils/modChecker.js')
 const SqlDB = require('../../services/connection.js');
 
 module.exports = {
-    data: new discord.SlashCommandBuilder()
+    data: new SlashCommandBuilder()
         .setName("void_setup")
         .setDescription("Set up a black hole channel for this bot."),
     async execute(interaction) {
@@ -16,15 +16,16 @@ module.exports = {
         } catch (error) {
             await interaction.reply({
                 content: "An error occurred! Please try again later!",
-                flags: discord.MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral
             });
+            Logger.error(interaction.guild.id, `[DB] ${error}`);
             console.error(error);
             return;
         }
         if(!guildData[0]){
             await interaction.reply({
                 content: "This server hasn't been set up for the spam guard feature yet, please contact the server owner to set up this feature.",
-                flags: discord.MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -32,7 +33,7 @@ module.exports = {
         if(interaction.user.id !== guildData[0].owner_id && !isMod){
             await interaction.reply({
                 content: "Only the server owner and admins can use this command.",
-                flags: discord.MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -45,8 +46,9 @@ module.exports = {
         } catch (error) {
             await interaction.reply({
                 content: "An error occurred! Please try again later!",
-                flags: discord.MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral
             });
+            Logger.error(interaction.guild.id, `[DB] ${error}`);
             console.error(error);
             return;
         }
@@ -56,7 +58,7 @@ module.exports = {
         if(!voidData[0] || !voidChannel){
             await interaction.reply({
                 content: "Hold on a sec, setting up automatically...",
-                flags: discord.MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral
             });
             if(voidChannel){
                 await voidChannel.delete();
@@ -70,29 +72,35 @@ module.exports = {
             } catch (error) {
                 await interaction.editReply({
                     content: "An error occurred! Please try again later!",
-                    flags: discord.MessageFlags.Ephemeral
+                    flags: MessageFlags.Ephemeral
                 });
+                Logger.error(interaction.guild.id, `[DB] ${error}`);
                 console.error(error);
                 return;
             }
+            Logger.info(interaction.guild.id, `[VOID_SETUP] A void channel setuped by ${interaction.user.username}(${interaction.user.id})`);
             await interaction.editReply({
                 content: "Automatic setup complete! Make sure the void is at the top of this server channel!\nThen, make sure to set this bot's role above all roles in this server (regular Members) so that the bot can work properly.\n\n",
-                flags: discord.MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral
             });
             return;
+        }else{
+            const setupedEmbed = await embed_alreadySetup(interaction);
+            const setupedComp = await voidSetupComponents(interaction);
+            const setupedBtn = await voidSetupButton(interaction);
+            await interaction.reply({
+                embeds: [setupedEmbed],
+                components: voidData[0].void_enabled ? [setupedComp, setupedBtn.disableButton] : [setupedComp, setupedBtn.enableButton],
+                flags: MessageFlags.Ephemeral
+            });
         }
-        const embedss = await embed_alreadySetup(interaction);
-        await interaction.reply({
-            embeds: [embedss],
-            flags: discord.MessageFlags.Ephemeral
-        });
     }
 }
 
 async function channelSetup(interaction){
     const voidCh = await interaction.guild.channels.create({
         name: "void",
-        type: discord.ChannelType.GuildText
+        type: ChannelType.GuildText
     });
     const voidMsg = await voidCh.send({
         embeds: [await embed_voidChMessage(interaction)],
@@ -111,12 +119,13 @@ async function embed_alreadySetup(interaction){
         );
     } catch (error) {
         console.error("An error occured in embed function: ",error);
-        return new discord.EmbedBuilder()
+        Logger.error(interaction.guild.id, `[DB] ${error}`);
+        return new EmbedBuilder()
             .setColor([187, 33, 36])
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
     }
-    return new discord.EmbedBuilder()
+    return new EmbedBuilder()
             .setColor([76, 175, 80])
             .setTitle("Void Information")
             .addFields(
@@ -136,9 +145,8 @@ async function embed_alreadySetup(interaction){
                 }
             )
 }
-
 async function embed_voidChMessage(){
-    return new discord.EmbedBuilder()
+    return new EmbedBuilder()
             .setColor([76, 175, 80])
             .setTitle("Void Channel!")
             .addFields(
@@ -152,36 +160,42 @@ async function embed_voidChMessage(){
                 }
             )
 }
-async function modChecker(interaction) {
-    try {
-        console.log("Menjalankan prosedur pengecekan status mod checker");
-        const [modRole] = await SqlDB.query(
-            "SELECT `admin_role` FROM guild_info WHERE `guild_id` = ?",
-            [interaction.guild.id]
-        ) 
-        const clicker = await interaction.guild.members.fetch(interaction.user.id);
-        const roles = clicker.roles.cache
-            .filter(role => role.id !== interaction.guild.id) // exclude @everyone
-            .map(role => ({
-                role: role.id,
-                name: role.name
-            }));
-        const tMods = modRole[0].admin_role;
-        let isMods = false;
-        for(const role of roles){
-            if(tMods.includes(role.role)){
-                console.log("Mods True");
-                isMods = true;
-            }
+async function voidSetupComponents(){
+    const dropdown = new StringSelectMenuBuilder()
+    .setCustomId('void#punishment')
+    .setPlaceholder('Choose the void punishment')
+    .addOptions([
+        {
+            label: 'Kick',
+            description: 'Kick the spammer out of this channel',
+            value: 'kick'
+        },
+        {
+            label: 'Timeout',
+            description: 'Time out the spammer for a day',
+            value: 'timeout'
+        },
+        {
+            label: 'Ban',
+            description: 'Kick and ban spammer from this channel',
+            value: 'ban'
         }
-        console.log("Mengecek status mod")
-        if(!isMods){
-            return false; 
-        }
-        console.log("Mereturn value function")
-        return true;
-    } catch (error) {
-        console.error("Error in modChecker function: ", error);
-        return false
+    ]);
+    return new ActionRowBuilder().addComponents(dropdown);
+}
+async function voidSetupButton(){
+    return {
+        enableButton: new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("void#enable")
+                .setLabel("Enable")
+                .setStyle(ButtonStyle.Primary)
+        ),
+        disableButton: new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("void#disable")
+                .setLabel("Disable")
+                .setStyle(ButtonStyle.Danger)
+        )
     }
 }
