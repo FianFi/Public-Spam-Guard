@@ -1,6 +1,6 @@
 const {SlashCommandBuilder, MessageFlags, ChannelType, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonStyle, ButtonBuilder} = require('discord.js');
-const {modCheck} = require('./utils/modChecker.js')
-const {errorEmbed} = require('./utils/embeds.js')
+const {modCheck} = require('./functs/modChecker.js')
+const {errorEmbed} = require('./functs/embeds.js')
 const SqlDB = require('../../services/connection.js');
 
 module.exports = {

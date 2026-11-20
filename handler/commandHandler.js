@@ -7,28 +7,27 @@ const foldersPath = path.join(__dirname, '../commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
-	// Masuk path commandFolders
+	// Grab all the command files from the commands directory you created earlier
 	const commandsPath = path.join(foldersPath, folder);
-	//melihat file berakhiran.js didalam commandsPath
+	console.log(commandsPath)
 	const commandFiles = fs
 		.readdirSync(commandsPath)
 		.filter((file) => file.endsWith('.js'));
-		// console.log(foldersPath);
-		// console.log(commandFolders);
-		// console.log(commandsPath);
-		// console.log(commandFiles);
-		for (const file of commandFiles) {
-			const filePath = path.join(commandsPath, file);
-			// console.log(filePath);
+	const args = commandsPath.split("\\")
+	console.log(args[args.length-1])
+	const fileFold = args[args.length-1];
+	console.log(commandFiles)
+	// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+	for (const file of commandFiles) {
+		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
-		// console.log(command)
 		// Set a new item in the Collection with the key as the command name and the value as the exported module
 		if ('data' in command && 'execute' in command) {
-			commands.set(command.data.name, command);
+			command.data["folder"] = fileFold
+			commands.set(command.data.name, command, fileFold);
 		} else {
 			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
 		}
-		// console.log(client.commands);
 	}
 }
 

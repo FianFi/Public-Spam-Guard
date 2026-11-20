@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js')
 const SqlDB = require('../../services/connection.js');
-const {modCheck} = require('./utils/modChecker.js');
-const { errorEmbed } = require('./utils/embeds.js');
+const {modCheck} = require('./functs/modChecker.js');
+const { errorEmbed } = require('./functs/embeds.js');
 
 module.exports = {
     data: new SlashCommandBuilder()

@@ -23,7 +23,7 @@ const client = new Client({
 		},
 	}
 });
-
+globalThis.allComms = commands;
 client.commands = commands;
 
 const eventFiles = fs
