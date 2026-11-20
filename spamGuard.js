@@ -1,15 +1,28 @@
 const { Logger } = require('./handler/botLogger.js');
+const embedColor = {
+	success: [76, 175, 80],
+	alert: [187, 33, 36]
+}
 globalThis.Logger = Logger;
+globalThis.embedColor = embedColor;
 require('dotenv').config();
 const fs = require('node:fs');
 const { Client, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 const commands = require('./handler/commandHandler.js');
 
-const client = new Client({ intents: [
-	GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-] });
+const client = new Client({ 
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent
+	],
+	sweepers: {
+		messages: {
+		interval: 3600, // Tiap 1 jam bersihkan pesan
+		lifetime: 1800, // Hapus pesan yang usianya lebih dari 30 menit
+		},
+	}
+});
 
 client.commands = commands;
 

@@ -18,15 +18,15 @@ class Logger {
     }
     static info(guildId, msg) {
         console.log(`[INFO] ${msg}`);
-        this.#write("app.info.log", "[INFO]", msg);
+        this.#write("app.info.log", guildId, "[INFO]", msg);
     }
     static error(guildId, msg) {
         console.log(`[ERROR] ${msg}`);
-        this.#write("app.error.log", "[ERROR]", msg);
+        this.#write("app.error.log", guildId, "[ERROR]", msg);
     }
     static void(guildId, punishment ,msg) {
         console.log(`[VOID] ${msg}`);
-        this.#write("app.void.log", `[VOID] [${punishment.toUpperCase()}]`, msg);
+        this.#write("app.void.log", guildId, `[VOID] [${punishment.toUpperCase()}]`, msg);
     }
 }
 

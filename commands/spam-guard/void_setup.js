@@ -1,5 +1,6 @@
 const {SlashCommandBuilder, MessageFlags, ChannelType, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonStyle, ButtonBuilder} = require('discord.js');
 const {modCheck} = require('./utils/modChecker.js')
+const {errorEmbed} = require('./utils/embeds.js')
 const SqlDB = require('../../services/connection.js');
 
 module.exports = {
@@ -10,12 +11,12 @@ module.exports = {
         let guildData;
         try {
             [guildData] = await SqlDB.query(
-                `SELECT * FROM guild_info WHERE guild_id = ?`,
+                `SELECT guild_info.guild_id AS guild_id, void_setting.guild_id AS void_guild_id, void_setting.void_channel_id, void_setting.void_enabled, void_setting.void_punishment FROM guild_info LEFT JOIN void_setting ON guild_info.guild_id = void_setting.guild_id WHERE guild_info.guild_id = ?`,
                 [interaction.guild.id]
             );
         } catch (error) {
             await interaction.reply({
-                content: "An error occurred! Please try again later!",
+                embeds: [await errorEmbed()],
                 flags: MessageFlags.Ephemeral
             });
             Logger.error(interaction.guild.id, `[DB] ${error}`);
@@ -30,32 +31,17 @@ module.exports = {
             return;
         }
         const isMod = await modCheck(interaction);
-        if(interaction.user.id !== guildData[0].owner_id && !isMod){
+        if(interaction.user.id !== interaction.guild.ownerId && !isMod){
             await interaction.reply({
                 content: "Only the server owner and admins can use this command.",
                 flags: MessageFlags.Ephemeral
             });
             return;
         }
-        let voidData;
-        try {
-            [voidData] = await SqlDB.query(
-                `SELECT * FROM void_setting WHERE guild_id = ?`,
-                [interaction.guild.id]
-            );
-        } catch (error) {
-            await interaction.reply({
-                content: "An error occurred! Please try again later!",
-                flags: MessageFlags.Ephemeral
-            });
-            Logger.error(interaction.guild.id, `[DB] ${error}`);
-            console.error(error);
-            return;
-        }
         const voidChannel = interaction.guild.channels.cache.find(
             c => c.name === 'void'
         );
-        if(!voidData[0] || !voidChannel){
+        if(guildData[0].void_guild_id === null || !voidChannel){
             await interaction.reply({
                 content: "Hold on a sec, setting up automatically...",
                 flags: MessageFlags.Ephemeral
@@ -71,7 +57,7 @@ module.exports = {
                 );
             } catch (error) {
                 await interaction.editReply({
-                    content: "An error occurred! Please try again later!",
+                    embeds: [await errorEmbed()],
                     flags: MessageFlags.Ephemeral
                 });
                 Logger.error(interaction.guild.id, `[DB] ${error}`);
@@ -80,17 +66,23 @@ module.exports = {
             }
             Logger.info(interaction.guild.id, `[VOID_SETUP] A void channel setuped by ${interaction.user.username}(${interaction.user.id})`);
             await interaction.editReply({
-                content: "Automatic setup complete! Make sure the void is at the top of this server channel!\nThen, make sure to set this bot's role above all roles in this server (regular Members) so that the bot can work properly.\n\n",
+                content: "",
+                embeds: [
+                    new EmbedBuilder()
+                    .setColor(embedColor.success)
+                    .setTitle("Automatic setup complete!")
+                    .setDescription("Automatic setup complete! Make sure the void is at the top of this server channel!\nThen, make sure to set this bot's role above all roles in this server (regular Members) so that the bot can work properly.")
+                ],
                 flags: MessageFlags.Ephemeral
             });
             return;
         }else{
-            const setupedEmbed = await embed_alreadySetup(interaction);
+            const setupedEmbed = await embed_alreadySetup(guildData[0]);
             const setupedComp = await voidSetupComponents(interaction);
             const setupedBtn = await voidSetupButton(interaction);
             await interaction.reply({
                 embeds: [setupedEmbed],
-                components: voidData[0].void_enabled ? [setupedComp, setupedBtn.disableButton] : [setupedComp, setupedBtn.enableButton],
+                components: guildData[0].void_enabled ? [setupedComp, setupedBtn.disableButton] : [setupedComp, setupedBtn.enableButton],
                 flags: MessageFlags.Ephemeral
             });
         }
@@ -110,38 +102,23 @@ async function channelSetup(interaction){
         voidMsgId: voidMsg.id
     };
 }
-async function embed_alreadySetup(interaction){
-    let voidData;
-    try {
-        [voidData] = await SqlDB.query(
-            `SELECT * FROM void_setting WHERE guild_id = ?`,
-            [interaction.guild.id]
-        );
-    } catch (error) {
-        console.error("An error occured in embed function: ",error);
-        Logger.error(interaction.guild.id, `[DB] ${error}`);
-        return new EmbedBuilder()
-            .setColor([187, 33, 36])
-            .setTitle("Error")
-            .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
-            .setFooter({text:"FianBot | FiStuff"})
-    }
+async function embed_alreadySetup(voidData){
     return new EmbedBuilder()
-            .setColor([76, 175, 80])
+            .setColor(embedColor.success)
             .setTitle("Void Information")
             .addFields(
                 {
                     name: "Void Channel:",
-                    value: `<#${voidData[0].void_channel_id}>`
+                    value: `<#${voidData.void_channel_id}>`
                 },
                 {
                     name: "Void Enabled:",
-                    value: `${voidData[0].void_enabled ? "True" : "False"}`,
+                    value: `${voidData.void_enabled ? "True" : "False"}`,
                     inline: true
                 },
                 {
                     name: "Void Punishment",
-                    value: `${voidData[0].void_punishment}`,
+                    value: `${voidData.void_punishment}`,
                     inline: true
                 }
             )
@@ -149,7 +126,7 @@ async function embed_alreadySetup(interaction){
 }
 async function embed_voidChMessage(){
     return new EmbedBuilder()
-        .setColor([76, 175, 80])
+        .setColor(embedColor.success)
         .setTitle("Void Channel!")
         .addFields(
             {

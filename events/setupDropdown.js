@@ -21,9 +21,7 @@ module.exports = {
         //     return;
         // }
         if(interaction.user.id !== interaction.guild.ownerId) return;
-        console.log(interaction.customId); 
         if(interaction.customId === "pick_setup_menu"){
-            console.log(interaction.values[0]); 
             switch(interaction.values[0]){
                 case "set_mods":
                     const smEmbed = await setModEmbed(interaction);
@@ -56,7 +54,6 @@ module.exports = {
                     [await setupComponents()],
                 flags: discord.MessageFlags.Ephemeral
             });
-            console.log(giEmbed.data.title);
         }else if(interaction.customId === "set_mod_role_dropdown"){
             let updateStatus;
             try {
@@ -126,13 +123,13 @@ async function setModEmbed(interaction){
         });
         console.error(error);
         return new discord.EmbedBuilder()
-            .setColor([187, 33, 36])
+            .setColor(embedColor.alert)
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
             .setFooter({text:"FianBot | FiStuff"})
     }
     return new discord.EmbedBuilder()
-        .setColor([76, 175, 80])
+        .setColor(embedColor.success)
         .setTitle("Set Moderator")
         .setDescription("Choose a role to make a moderator")
         .addFields(
@@ -158,13 +155,13 @@ async function setLogChEmbed(interaction){
         });
         console.error(error);
         return new discord.EmbedBuilder()
-            .setColor([187, 33, 36])
+            .setColor(embedColor.alert)
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
             .setFooter({text:"FianBot | FiStuff"})
     }
     return new discord.EmbedBuilder()
-        .setColor([76, 175, 80])
+        .setColor(embedColor.success)
         .setTitle("Set Bot Log Channel")
         .setDescription("Choose a channel to make a bot log channel")
         .addFields(
@@ -237,7 +234,7 @@ async function guildInformationEmbed(interaction){
         });
         console.error(error);
         return new discord.EmbedBuilder()
-            .setColor([187, 33, 36])
+            .setColor(embedColor.alert)
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
             .setFooter({text:"FianBot | FiStuff"})
@@ -252,7 +249,7 @@ async function guildInformationEmbed(interaction){
     );
     const peaText = `<t:${peaUnixTime}:R>`;
     return new discord.EmbedBuilder()
-            .setColor([76, 175, 80])
+            .setColor(embedColor.success)
             .setTitle("Guild Information")
             .setDescription("Your server has been set up, here’s the server information recorded in the bot")
             .addFields(

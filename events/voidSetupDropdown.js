@@ -4,7 +4,6 @@ const SqlDB = require('../services/connection.js');
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction){ 
-        console.log(interaction.customId); 
         if(!interaction.isStringSelectMenu() && !interaction.isButton() && !interaction.isRoleSelectMenu() && !interaction.isChannelSelectMenu()) return;
         const args = interaction.customId.split("#");
         if(args[0] !== "void")return;
@@ -55,7 +54,6 @@ module.exports = {
                     components: [setupedComp, setupedBtn.disableButton],
                     flags: MessageFlags.Ephemeral
                 });
-                console.log("disable");
             break;
             case "disable":
                 try {
@@ -81,7 +79,6 @@ module.exports = {
                     components: [setupedComp, setupedBtn.enableButton],
                     flags: MessageFlags.Ephemeral
                 });
-                console.log("enable");
             break;
             case "punishment":
                 switch(interaction.values[0]){
@@ -200,29 +197,29 @@ async function embed_alreadySetup(interaction){
         Logger.error(interaction.guild.id, `[DB] ${error}`);
         console.error("An error occured in embed function: ",error);
         return new EmbedBuilder()
-            .setColor([187, 33, 36])
+            .setColor(embedColor.alert)
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
             .setFooter({text:"FianBot | FiStuff"})
     }
     return new EmbedBuilder()
-            .setColor([76, 175, 80])
-            .setTitle("Void Information")
-            .addFields(
-                {
-                    name: "Void Channel:",
-                    value: `<#${voidData[0].void_channel_id}>`
-                },
-                {
-                    name: "Void Enabled:",
-                    value: `${voidData[0].void_enabled ? "True" : "False"}`,
-                    inline: true
-                },
-                {
-                    name: "Void Punishment",
-                    value: `${voidData[0].void_punishment}`,
-                    inline: true
-                }
-            )
-            .setFooter({text:"FianBot | FiStuff"})
+        .setColor(embedColor.success)
+        .setTitle("Void Information")
+        .addFields(
+            {
+                name: "Void Channel:",
+                value: `<#${voidData[0].void_channel_id}>`
+            },
+            {
+                name: "Void Enabled:",
+                value: `${voidData[0].void_enabled ? "True" : "False"}`,
+                inline: true
+            },
+            {
+                name: "Void Punishment",
+                value: `${voidData[0].void_punishment}`,
+                inline: true
+            }
+        )
+        .setFooter({text:"FianBot | FiStuff"})
 }

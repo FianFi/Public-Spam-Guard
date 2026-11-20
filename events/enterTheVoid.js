@@ -126,7 +126,7 @@ async function embed_voidChMessage(message){
         return;
     }
     return new discord.EmbedBuilder()
-            .setColor([76, 175, 80])
+            .setColor(embedColor.success)
             .setTitle("Void Channel!")
             .addFields(
                 {

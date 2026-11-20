@@ -1,18 +1,16 @@
-const discord = require('discord.js');
+const { SlashCommandBuilder, MessageFlags, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const SqlDB = require('../../services/connection.js');
+const {errorEmbed} = require('./utils/embeds.js')
 
 module.exports = {
-    data: new discord.SlashCommandBuilder()
-        .setName("setup")
-        .setDescription("Manual void setup."),
+    data: new SlashCommandBuilder()
+    .setName("setup")
+    .setDescription("Manual void setup."),
     async execute(interaction) {
-        console.log(
-            interaction.user.id, "\n", interaction.guild.ownerId
-        )
         if(interaction.user.id !== interaction.guild.ownerId){
             await interaction.reply({
                 content: "Only the server owner can set up void!",
-                flags: discord.MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -24,8 +22,8 @@ module.exports = {
             );
         } catch (error) {
             await interaction.reply({
-                content: "An error occurred! Please try again later!",
-                flags: discord.MessageFlags.Ephemeral
+                embeds: [await errorEmbed()],
+                flags: MessageFlags.Ephemeral
             });
             Logger.error(interaction.guild.id, `[DB] ${error}`);
             console.error(error);
@@ -36,12 +34,11 @@ module.exports = {
             await interaction.reply({
                 embeds: [giEmbed],
                 components: 
-                    giEmbed.data.title === "Error" ?
-                    [] :
-                    [await setupComponents()],
-                flags: discord.MessageFlags.Ephemeral
+                giEmbed.data.title === "Error" ?
+                [] :
+                [await setupComponents()],
+                flags: MessageFlags.Ephemeral
             });
-            console.log(giEmbed.data.title);
         }else if(!guildData[0]){
             const guildId = interaction.guild.id;
             const guildName = interaction.guild.name;
@@ -59,8 +56,8 @@ module.exports = {
                 Logger.error(interaction.guild.id, `[DB] ${error}`);
                 console.error("Error occurred while inserting table:",error)
                 await interaction.reply({
-                    content: "An error occurred! Please try again later!",
-                    flags: discord.MessageFlags.Ephemeral
+                    embeds: [await errorEmbed()],
+                    flags: MessageFlags.Ephemeral
                 });
                 return;
             }
@@ -76,7 +73,7 @@ module.exports = {
                 console.error("Error occurred while inserting table:",error)
                 await interaction.reply({
                     content: "An error occurred! Please try again later!",
-                    flags: discord.MessageFlags.Ephemeral
+                    flags: MessageFlags.Ephemeral
                 });
                 return;
             }
@@ -84,12 +81,13 @@ module.exports = {
                 Logger.info(interaction.guild.id, `[SERV_SETUP] Server setuped by ${interaction.user.username}(${interaction.user.id})`);
                 await interaction.reply({
                     content: "Server setup was successful!\nYou can adjust the moderator role however you like",
-                    flags: discord.MessageFlags.Ephemeral
+                    flags: MessageFlags.Ephemeral
                 });
             }else{
                 await interaction.reply({
                     content: "An error occurred! Please try again later!\nOr send a report if you think this is a system error.",
-                    flags: discord.MessageFlags.Ephemeral
+                    embeds: [await errorEmbed()],
+                    flags: MessageFlags.Ephemeral
                 });
             }
         }
@@ -100,21 +98,17 @@ async function guildInformationEmbed(interaction){
     let guildData;
     try {
         [guildData] = await SqlDB.query(
-            `SELECT * FROM guild_info WHERE guild_id = ?`,
+            `SELECT guild_name, owner_id, admin_role, first_setup_at, is_premium, premium_expires_at, log_channel_id FROM guild_info WHERE guild_id = ?`,
             [interaction.guild.id]
         );
     } catch (error) {
         Logger.error(interaction.guild.id, `[DB] ${error}`);
         await interaction.reply({
             content: "An error occurred! Please try again later!",
-            flags: discord.MessageFlags.Ephemeral
+            flags: MessageFlags.Ephemeral
         });
         console.error(error);
-        return new discord.EmbedBuilder()
-            .setColor([187, 33, 36])
-            .setTitle("Error")
-            .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
-            .setFooter({text:"FianBot | FiStuff"});
+        return await errorEmbed();
     }
     const fsaUnixTime = Math.floor(
         new Date(guildData[0].first_setup_at).getTime() / 1000
@@ -125,8 +119,8 @@ async function guildInformationEmbed(interaction){
         new Date(guildData[0].premium_expires_at).getTime() / 1000
     );
     const peaText = `<t:${peaUnixTime}:R>`;
-    return new discord.EmbedBuilder()
-        .setColor([76, 175, 80])
+    return new EmbedBuilder()
+        .setColor(embedColor.success)
         .setTitle("Guild Information")
         .setDescription("Your server has been set up, here’s the server information recorded in the bot")
         .addFields(
@@ -172,7 +166,7 @@ async function guildInformationEmbed(interaction){
         .setFooter({text:"FianBot | FiStuff"})
 }
 async function setupComponents(){
-    const dropdown = new discord.StringSelectMenuBuilder()
+    const dropdown = new StringSelectMenuBuilder()
     .setCustomId('pick_setup_menu')
     .setPlaceholder('Choose one of the menu options...')
     .addOptions([
@@ -189,5 +183,5 @@ async function setupComponents(){
             emoji: '📪'
         }
     ]);
-    return new discord.ActionRowBuilder().addComponents(dropdown);
+    return new ActionRowBuilder().addComponents(dropdown);
 }
