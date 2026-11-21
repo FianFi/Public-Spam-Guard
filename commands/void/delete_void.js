@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, MessageFlags, EmbedBuilder } = require('discord.js')
-const {modCheck} = require('./functs/modChecker.js')
+const {modCheck} = require('./utils/modChecker.js')
 const SqlDB = require('../../services/connection.js');
-const { errorEmbed } = require('./functs/embeds.js');
+const { errorEmbed } = require('./utils/embeds.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,7 +16,7 @@ module.exports = {
                 guild_info.owner_id, 
                 void_setting.void_channel_id 
                 FROM guild_info 
-                JOIN void_setting 
+                LEFT JOIN void_setting 
                 ON guild_info.guild_id = void_setting.guild_id 
                 WHERE guild_info.guild_id = ?`,
                 [interaction.guild.id]
@@ -30,6 +30,7 @@ module.exports = {
             console.error(error);
             return;
         }
+        console.log(guildData[0])
         if(!guildData[0]){
             await interaction.reply({
                 content: "This server hasn't been set up for the spam guard feature yet, please contact the server owner to set up this feature.",
@@ -48,6 +49,13 @@ module.exports = {
         if(guildData[0].void_channel_id === null){
             await interaction.reply({
                 content: "No void channel has been set up yet",
+                embeds: [
+                    new EmbedBuilder()
+                    .setColor(embedColor.alert)
+                    .setTitle("Void Not Found")
+                    .setDescription("Your server hasn't been set up for the void feature!")
+                    .setFooter(configs.embed_footer)
+                ],
                 flags: MessageFlags.Ephemeral
             });
             return;

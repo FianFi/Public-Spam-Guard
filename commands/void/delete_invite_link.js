@@ -1,19 +1,13 @@
 const { SlashCommandBuilder, MessageFlags, EmbedBuilder } = require('discord.js')
-const {modCheck} = require('./functs/modChecker.js')
 const SqlDB = require('../../services/connection.js');
-const { errorEmbed } = require('./functs/embeds.js');
+const {modCheck} = require('./utils/modChecker.js');
+const { errorEmbed } = require('./utils/embeds.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("set_invite_link")
-        .setDescription("Adding an invite link to appear in the bot's DM to spam users if they get kicked.")
-        .addStringOption(option =>
-            option.setName("link")
-                .setDescription("This server invitatin link.")
-                .setRequired(true)
-        ),
+        .setName("delete_invite_link")
+        .setDescription("Removing the invite link for this bot."),
     async execute(interaction) {
-        const inviteLink = interaction.options.getString("link");
         let guildData;
         try {
             [guildData] = await SqlDB.query(
@@ -39,19 +33,19 @@ module.exports = {
         const isMod = await modCheck(interaction);
         if(interaction.user.id !== interaction.guild.ownerId && !isMod){
             await interaction.reply({
-                embeds: [await errorEmbed()],
+                content: "Only the server owner and admins can use this command.",
                 flags: MessageFlags.Ephemeral
             });
             return;
         }
-        if(guildData[0].guild_invite_link !== null){
+        if(guildData[0].guild_invite_link === null){
             await interaction.reply({
                 embeds: [
                     new EmbedBuilder()
-                        .setColor(embedColor.alert)
-                        .setTitle("Invite link already listed!")
-                        .setDescription("Link: "+guildData[0].guild_invite_link) 
-                    
+                    .setColor(embedColor.alert)
+                    .setTitle("Link Empty")
+                    .setDescription("Your server hasn't added an invite link!")
+                    .setFooter(configs.embed_footer)
                 ],
                 flags: MessageFlags.Ephemeral
             });
@@ -59,10 +53,10 @@ module.exports = {
         }
         try {
             await SqlDB.query(
-                `UPDATE guild_info
-                SET guild_invite_link = ?
-                WHERE guild_id = ? `,
-                [inviteLink, interaction.guild.id]
+                `UPDATE guild_info 
+                SET guild_invite_link = null
+                WHERE guild_id = ?`,
+                [interaction.guild.id]
             );
         } catch (error) {
             await interaction.reply({
@@ -73,14 +67,10 @@ module.exports = {
             console.error(error);
             return;
         }
-        Logger.info(interaction.guild.id, `[INVITE_LINK_SET] ${interaction.user.username}(${interaction.user.id}) has set server invite link "${inviteLink}"`);
+        
+        Logger.info(interaction.guild.id, `[DELETE_INVITE_LINK] Invite link has deleted by ${interaction.user.username}(${interaction.user.id})`);
         await interaction.reply({
-            embeds: [
-                new EmbedBuilder()
-                    .setColor(embedColor.success)
-                    .setTitle("Invite link seted!")
-                    .setDescription("Link: "+inviteLink) 
-            ],
+            content: `The invite link has been deleted.`,
             flags: MessageFlags.Ephemeral
         }); 
     }

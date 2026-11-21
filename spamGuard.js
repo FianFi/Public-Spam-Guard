@@ -3,8 +3,10 @@ const embedColor = {
 	success: [76, 175, 80],
 	alert: [187, 33, 36]
 }
+const configs = require('./config.json')
 globalThis.Logger = Logger;
 globalThis.embedColor = embedColor;
+globalThis.configs = configs;
 require('dotenv').config();
 const fs = require('node:fs');
 const { Client, Events, GatewayIntentBits, MessageFlags } = require('discord.js');

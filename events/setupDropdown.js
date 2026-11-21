@@ -1,8 +1,8 @@
-const discord = require('discord.js');
+const { Events, EmbedBuilder, MessageFlags, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, RoleSelectMenuBuilder, ChannelSelectMenuBuilder, ChannelType, ButtonStyle} = require('discord.js');
 const SqlDB = require('../services/connection.js');
 
 module.exports = {
-    name: discord.Events.InteractionCreate,
+    name: Events.InteractionCreate,
     async execute(interaction){ 
         if(!interaction.isStringSelectMenu() && !interaction.isButton() && !interaction.isRoleSelectMenu() && !interaction.isChannelSelectMenu()) return;
         // let guildData;
@@ -14,7 +14,7 @@ module.exports = {
         // } catch (error) {
         //     await interaction.reply({
         //         content: "An error occurred! Please try again later!",
-        //         flags: discord.MessageFlags.Ephemeral
+        //         flags: MessageFlags.Ephemeral
         //     });
         //     Logger.error(interaction.guild.id, `[DB] ${error}`);
         //     console.error(error);
@@ -52,7 +52,7 @@ module.exports = {
                     giEmbed.data.title === "Error" ?
                     [] :
                     [await setupComponents()],
-                flags: discord.MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral
             });
         }else if(interaction.customId === "set_mod_role_dropdown"){
             let updateStatus;
@@ -66,7 +66,7 @@ module.exports = {
                 console.error("Error occurred while updating table:",error)
                 await interaction.reply({
                     content: "An error occurred! Please try again later!",
-                    flags: discord.MessageFlags.Ephemeral
+                    flags: MessageFlags.Ephemeral
                 });
                 return;
             }
@@ -91,7 +91,7 @@ module.exports = {
                 console.error("Error occurred while updating table:",error)
                 await interaction.reply({
                     content: "An error occurred! Please try again later!",
-                    flags: discord.MessageFlags.Ephemeral
+                    flags: MessageFlags.Ephemeral
                 });
                 return;
             }
@@ -119,16 +119,16 @@ async function setModEmbed(interaction){
         Logger.error(interaction.guild.id, `[DB] ${error}`);
         await interaction.reply({
             content: "An error occurred! Please try again later!",
-            flags: discord.MessageFlags.Ephemeral
+            flags: MessageFlags.Ephemeral
         });
         console.error(error);
-        return new discord.EmbedBuilder()
+        return new EmbedBuilder()
             .setColor(embedColor.alert)
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
-            .setFooter({text:"FianBot | FiStuff"})
+            .setFooter(configs.embed_footer)
     }
-    return new discord.EmbedBuilder()
+    return new EmbedBuilder()
         .setColor(embedColor.success)
         .setTitle("Set Moderator")
         .setDescription("Choose a role to make a moderator")
@@ -138,7 +138,7 @@ async function setModEmbed(interaction){
                 value: `${guildData[0].admin_role ? `<@&${guildData[0].admin_role}>` : `No Mod`}`
             }
         )
-        .setFooter({text:"FianBot | FiStuff"})
+        .setFooter(configs.embed_footer)
 }
 async function setLogChEmbed(interaction){
     let guildData;
@@ -151,16 +151,16 @@ async function setLogChEmbed(interaction){
         Logger.error(interaction.guild.id, `[DB] ${error}`);
         await interaction.reply({
             content: "An error occurred! Please try again later!",
-            flags: discord.MessageFlags.Ephemeral
+            flags: MessageFlags.Ephemeral
         });
         console.error(error);
-        return new discord.EmbedBuilder()
+        return new EmbedBuilder()
             .setColor(embedColor.alert)
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
-            .setFooter({text:"FianBot | FiStuff"})
+            .setFooter(configs.embed_footer)
     }
-    return new discord.EmbedBuilder()
+    return new EmbedBuilder()
         .setColor(embedColor.success)
         .setTitle("Set Bot Log Channel")
         .setDescription("Choose a channel to make a bot log channel")
@@ -170,10 +170,10 @@ async function setLogChEmbed(interaction){
                 value: `${guildData[0].log_channel_id ? `<#${guildData[0].log_channel_id}>` : "Default at System Log"}`
             }
         )
-        .setFooter({text:"FianBot | FiStuff"})
+        .setFooter(configs.embed_footer)
 }
 async function setupComponents(){
-    const dropdown = new discord.StringSelectMenuBuilder()
+    const dropdown = new StringSelectMenuBuilder()
     .setCustomId('pick_setup_menu')
     .setPlaceholder('Choose one of the menu options...')
     .addOptions([
@@ -190,34 +190,34 @@ async function setupComponents(){
             emoji: '📪'
         }
     ]);
-    return new discord.ActionRowBuilder().addComponents(dropdown);
+    return new ActionRowBuilder().addComponents(dropdown);
 }
 async function saveButton(){
-    return new discord.ActionRowBuilder().addComponents(
-        new discord.ButtonBuilder()
+    return new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
             .setCustomId("back_setup")
             .setLabel("<- Back")
-            .setStyle(discord.ButtonStyle.Danger)
+            .setStyle(ButtonStyle.Danger)
     ); 
 }
 async function roleDropdown(){
-    const roleDropdown = new discord.RoleSelectMenuBuilder()
+    const roleDropdown = new RoleSelectMenuBuilder()
         .setCustomId('set_mod_role_dropdown')
         .setPlaceholder('Choose the moderator role...')
         .setMinValues(1)
         .setMaxValues(1);
 
-    return new discord.ActionRowBuilder().addComponents(roleDropdown);
+    return new ActionRowBuilder().addComponents(roleDropdown);
 }
 async function channelDropdown(){
-    const channelDropdown = new discord.ChannelSelectMenuBuilder()
+    const channelDropdown = new ChannelSelectMenuBuilder()
     .setCustomId('set_bot_log_dropdown')
     .setPlaceholder('Choose the bot log channel...')
-    .setChannelTypes(discord.ChannelType.GuildText)
+    .setChannelTypes(ChannelType.GuildText)
     .setMinValues(1)
     .setMaxValues(1);
 
-    return new discord.ActionRowBuilder().addComponents(channelDropdown);
+    return new ActionRowBuilder().addComponents(channelDropdown);
 }
 async function guildInformationEmbed(interaction){
     let guildData;
@@ -230,14 +230,14 @@ async function guildInformationEmbed(interaction){
         Logger.error(interaction.guild.id, `[DB] ${error}`);
         await interaction.reply({
             content: "An error occurred! Please try again later!",
-            flags: discord.MessageFlags.Ephemeral
+            flags: MessageFlags.Ephemeral
         });
         console.error(error);
-        return new discord.EmbedBuilder()
+        return new EmbedBuilder()
             .setColor(embedColor.alert)
             .setTitle("Error")
             .setDescription("An error occurred! Please try again later!\nOr send a report if you think this is a system error.")
-            .setFooter({text:"FianBot | FiStuff"})
+            .setFooter(configs.embed_footer)
     }
     const fsaUnixTime = Math.floor(
         new Date(guildData[0].first_setup_at).getTime() / 1000
@@ -248,7 +248,7 @@ async function guildInformationEmbed(interaction){
         new Date(guildData[0].premium_expires_at).getTime() / 1000
     );
     const peaText = `<t:${peaUnixTime}:R>`;
-    return new discord.EmbedBuilder()
+    return new EmbedBuilder()
             .setColor(embedColor.success)
             .setTitle("Guild Information")
             .setDescription("Your server has been set up, here’s the server information recorded in the bot")
@@ -292,5 +292,5 @@ async function guildInformationEmbed(interaction){
                     inline: true
                 }
             )
-            .setFooter({text:"FianBot | FiStuff"})
+            .setFooter(configs.embed_footer)
 }

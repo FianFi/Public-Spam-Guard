@@ -1,6 +1,6 @@
 const {SlashCommandBuilder, MessageFlags, ChannelType, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonStyle, ButtonBuilder} = require('discord.js');
-const {modCheck} = require('./functs/modChecker.js')
-const {errorEmbed} = require('./functs/embeds.js')
+const {modCheck} = require('./utils/modChecker.js')
+const {errorEmbed} = require('./utils/embeds.js')
 const SqlDB = require('../../services/connection.js');
 
 module.exports = {
@@ -72,6 +72,7 @@ module.exports = {
                     .setColor(embedColor.success)
                     .setTitle("Automatic setup complete!")
                     .setDescription("Automatic setup complete! Make sure the void is at the top of this server channel!\nThen, make sure to set this bot's role above all roles in this server (regular Members) so that the bot can work properly.")
+                    .setFooter(configs.embed_footer)
                 ],
                 flags: MessageFlags.Ephemeral
             });
@@ -122,7 +123,7 @@ async function embed_alreadySetup(voidData){
                     inline: true
                 }
             )
-            .setFooter({text:"FianBot | FiStuff"})
+            .setFooter(configs.embed_footer)
 }
 async function embed_voidChMessage(){
     return new EmbedBuilder()
@@ -138,7 +139,7 @@ async function embed_voidChMessage(){
                 value: "0"
             }
         )
-        .setFooter({text:"FianBot | FiStuff"})
+        .setFooter(configs.embed_footer)
 }
 async function voidSetupComponents(){
     const dropdown = new StringSelectMenuBuilder()

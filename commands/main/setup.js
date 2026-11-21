@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, MessageFlags, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const SqlDB = require('../../services/connection.js');
-const {errorEmbed} = require('./functs/embeds.js')
+const {errorEmbed} = require('./utils/embeds.js')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -80,12 +80,17 @@ module.exports = {
             if(insertStatus.affectedRows === 1){
                 Logger.info(interaction.guild.id, `[SERV_SETUP] Server setuped by ${interaction.user.username}(${interaction.user.id})`);
                 await interaction.reply({
-                    content: "Server setup was successful!\nYou can adjust the moderator role however you like",
+                    embeds: [
+                        new EmbedBuilder()
+                        .setColor(embedColor.success)
+                        .setTitle("Server setup was successful!")
+                        .setDescription("You can adjust the moderator role however you like")
+                        .setFooter(configs.embed_footer)
+                    ],
                     flags: MessageFlags.Ephemeral
                 });
             }else{
                 await interaction.reply({
-                    content: "An error occurred! Please try again later!\nOr send a report if you think this is a system error.",
                     embeds: [await errorEmbed()],
                     flags: MessageFlags.Ephemeral
                 });
@@ -163,7 +168,7 @@ async function guildInformationEmbed(interaction){
                 inline: true
             }
         )
-        .setFooter({text:"FianBot | FiStuff"})
+        .setFooter(configs.embed_footer)
 }
 async function setupComponents(){
     const dropdown = new StringSelectMenuBuilder()

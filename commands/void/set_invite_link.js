@@ -1,13 +1,19 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js')
+const { SlashCommandBuilder, MessageFlags, EmbedBuilder } = require('discord.js')
+const {modCheck} = require('./utils/modChecker.js')
 const SqlDB = require('../../services/connection.js');
-const {modCheck} = require('./functs/modChecker.js');
-const { errorEmbed } = require('./functs/embeds.js');
+const { errorEmbed } = require('./utils/embeds.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("delete_invite_link")
-        .setDescription("Removing the invite link for this bot."),
+        .setName("set_invite_link")
+        .setDescription("Adding an invite link to appear in the bot's DM to spam users if they get kicked.")
+        .addStringOption(option =>
+            option.setName("link")
+                .setDescription("This server invitatin link.")
+                .setRequired(true)
+        ),
     async execute(interaction) {
+        const inviteLink = interaction.options.getString("link");
         let guildData;
         try {
             [guildData] = await SqlDB.query(
@@ -16,7 +22,7 @@ module.exports = {
             );
         } catch (error) {
             await interaction.reply({
-                content: "An error occurred! Please try again later!",
+                embeds: [await errorEmbed()],
                 flags: MessageFlags.Ephemeral
             });
             Logger.error(interaction.guild.id, `[DB] ${error}`);
@@ -33,24 +39,31 @@ module.exports = {
         const isMod = await modCheck(interaction);
         if(interaction.user.id !== interaction.guild.ownerId && !isMod){
             await interaction.reply({
-                content: "Only the server owner and admins can use this command.",
+                embeds: [await errorEmbed()],
                 flags: MessageFlags.Ephemeral
             });
             return;
         }
-        if(guildData[0].guild_invite_link === null){
+        if(guildData[0].guild_invite_link !== null){
             await interaction.reply({
-                embeds: [await errorEmbed()],
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor(embedColor.alert)
+                        .setTitle("Invite link already listed!")
+                        .setDescription("Link: "+guildData[0].guild_invite_link) 
+                        .setFooter(configs.embed_footer)
+                    
+                ],
                 flags: MessageFlags.Ephemeral
             });
             return;
         }
         try {
             await SqlDB.query(
-                `UPDATE guild_info 
-                SET guild_invite_link = null
-                WHERE guild_id = ?`,
-                [interaction.guild.id]
+                `UPDATE guild_info
+                SET guild_invite_link = ?
+                WHERE guild_id = ? `,
+                [inviteLink, interaction.guild.id]
             );
         } catch (error) {
             await interaction.reply({
@@ -61,10 +74,15 @@ module.exports = {
             console.error(error);
             return;
         }
-        
-        Logger.info(interaction.guild.id, `[DELETE_INVITE_LINK] Invite link has deleted by ${interaction.user.username}(${interaction.user.id})`);
+        Logger.info(interaction.guild.id, `[INVITE_LINK_SET] ${interaction.user.username}(${interaction.user.id}) has set server invite link "${inviteLink}"`);
         await interaction.reply({
-            content: `The invite link has been deleted.`,
+            embeds: [
+                new EmbedBuilder()
+                    .setColor(embedColor.success)
+                    .setTitle("Invite link seted!")
+                    .setDescription("Link: "+inviteLink) 
+                    .setFooter(configs.embed_footer)
+            ],
             flags: MessageFlags.Ephemeral
         }); 
     }
